@@ -1,4 +1,3 @@
-#if 0
 #include "precomp.h"
 #include <gl\GL.h>
 #include "ViewportManager.h"
@@ -72,63 +71,49 @@ void ViewportManager::draw() const throw()
   }
   else
   {
-    for ( std::vector<Viewport>::const_iterator iter = m_viewports.cbegin(); iter != m_viewports.cend(); ++iter )
-    {
-      iter->draw( m_fShowingFullScreen );
-    }
-  }
-  if ( m_fShowingHelp )
-  {
-    camera();
-    glViewport(0,0,width,height);
-    writeHelp();
+    std::for_each( m_viewports.cbegin(), m_viewports.cend(), std::bind2nd( draw, m_fShowingFullScreen ) );
   }
 }
 
-void ViewportManager::onMousePressed()
+void ViewportManager::onMousePressed( int mouseX, int mouseY )
 {
   int viewport = getViewportForMouse( mouseX, mouseY );
   selectViewport( viewport );
   if (m_selectedViewport != -1)
   {
-    m_viewports.get(m_selectedViewport).onMousePressed();
+    m_viewports[m_selectedViewport].onMousePressed( mouseX, mouseY );
   }
   else
   {
+    LOG("No viewport currently selected", DEBUG_LEVELS::VERBOSE );
   }
 }
 
-void onMouseDragged()
+void ViewportManager::onMouseDragged( int deltaX, int deltaY )
 {
   if (m_selectedViewport != -1)
   {
-    m_viewports.get(m_selectedViewport).onMouseDragged();
+    m_viewports[m_selectedViewport].onMouseDragged( deltaX, deltaY );
   }
   else
   {
-    if (DEBUG && DEBUG_MODE >= LOW)
-    {
-      print ("ViewportManager::onMouseDragged - no viewport currently selected");
-    }
+    LOG( "No viewport currently selected", DEBUG_LEVELS::VERBOSE );
   }
 }
 
-void onMouseMoved()
+void ViewportManager::onMouseMoved( int deltaX, int deltaY )
 {
   if (m_selectedViewport != -1)
   {
-    m_viewports.get(m_selectedViewport).onMouseMoved();
+    m_viewports[m_selectedViewport].onMouseMoved( deltaX, deltaY );
   }
   else
   {
-    if (DEBUG && DEBUG_MODE >= LOW)
-    {
-      print ("ViewportManager::onMouseMoved - no viewport currently selected");
-    }
+    LOG( "No viewport currently selected", DEBUG_LEVELS::VERBOSE );
   }
 }
 
-void onKeyReleased()
+void ViewportManager::onKeyReleased( char key )
 {
   if (m_selectedViewport != -1)
   {
@@ -136,14 +121,11 @@ void onKeyReleased()
   }
   else
   {
-    if (DEBUG && DEBUG_MODE >= LOW)
-    {
-      print ("ViewportManager::onMouseDragged - no viewport currently selected");
-    }
+    LOG( "No viewport currently selected", DEBUG_LEVELS::VERBOSE );
   }
 }
 
-void onKeyPressed()
+void ViewportManager::onKeyPressed( char key )
 {
   if (key == '.')
   {
@@ -156,36 +138,29 @@ void onKeyPressed()
   {
     m_fShowingFullScreen = !m_fShowingFullScreen;
   }
-  if (key == 'H')
-  {
-    m_fShowingHelp = !m_fShowingHelp;
-  }
 
-  if (key == '!') {snapPicture();}
-  
+  //if (key == '!') {snapPicture();}
+
   if (m_selectedViewport != -1)
   {
-    m_viewports.get(m_selectedViewport).onKeyPressed();
-  }    
+    m_viewports[m_selectedViewport].onKeyPressed();
+  }
 }
 
-private int getViewportForMouse( int mouseX, int mouseY )
+int ViewportManager::getViewportForMouse( int mouseX, int mouseY ) const throw()
 {
   if ( m_fShowingFullScreen )
   {
     return m_selectedViewport;
   }
+
   for (int i = 0; i < m_viewports.size(); i++)
   {
-    if (m_viewports.get(i).containsPoint(mouseX, height - mouseY))
+    if (m_viewports[i].containsPoint(mouseX, height - mouseY))
     {
       return i;
     }
   }
-  if ( DEBUG && DEBUG_MODE >= LOW )
-  {
-    print ("ViewportManager::getViewportForMouse : can't find viewport for mouse. Keeping same viewport!");
-  }
+  LOG("Can't find viewport for mouse. Keeping same viewport!", DEBUG_LEVELS::VERBOSE );
   return m_selectedViewport;
 }
-#endif
