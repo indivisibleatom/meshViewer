@@ -3,6 +3,7 @@
 
 #include "Viewport.h"
 #include "Mesh.h"
+#include "Rect.h"
 
 class ViewportManager
 {
@@ -10,9 +11,10 @@ private:
   std::vector<Viewport> m_viewports;
   int m_selectedViewport;
   bool m_fShowingFullScreen;
+  Rect<int> m_rect;
 
 public:
-  ViewportManager();
+  ViewportManager( const Rect<int>& rect );
   void addViewport( const Viewport& v );
   int getSelectedViewport() const throw();
   void selectViewport( int index ) throw();

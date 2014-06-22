@@ -6,6 +6,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/serialization/strong_typedef.hpp>
+#include <FL/gl.h>
 
 const int MAX_VALENCE = 100;
 
@@ -25,11 +26,22 @@ private:
   std::vector<VIndex> m_OTable;
   std::vector<Point<U>> m_GTable;
 
+  GLint m_vertexVBO;
+  GLint m_colorVBO;
+  GLint m_edgeVBO;
+
 public:
+#pragma region InitMesh
   void addVertex( const Point<U>& p );
   void addTriangle( VIndex v1, VIndex v2, VIndex v3 );
+
+  void initMesh()
+  {
+    initVBO( 0 );
+  }
+#pragma endregion InitMesh
   
-  //Corner table
+#pragma region CornerOperators
   TIndex t(CIndex c) const throw() { return TIndex(c/3); }
   CIndex n(CIndex c) const throw() { return CIndex(3*t(c) + (c+1)%3); }
   CIndex p(CIndex c) const throw() { return CIndex(3*t(c) + (c+2)%3); }
@@ -41,7 +53,9 @@ public:
   CIndex u(CIndex c) const throw() { return p(r(c)); }
   CIndex c(TIndex t) const throw() { return CIndex(t*3); }
   const Point<U>& G(CIndex c) const throw() { return m_GTable[v(c)]; }
+#pragma endregion CornerOperators
 
+#pragma region SwingIterator
   class Swing_iterator : public std::iterator<std::input_iterator_tag, CIndex, ptrdiff_t, const CIndex*, const CIndex&> // Info about iterator
   {
   private:
@@ -84,6 +98,7 @@ public:
 
   Swing_iterator beginSwingIterator(int corner) { return Swing_iterator<T>( *this, corner ); }
   Swing_iterator endSwingIterator(int corner) { return Swing_iterator<T>( *this, corner, true/*fDoneAtleastOneSwing*/ ); }
+#pragma endregion SwingIterator
 
   void computeO()
   {
@@ -156,6 +171,7 @@ public:
     }
   }
 
+#pragma region LOADING
   //TODO msati3: Push this out to a builder class sometime later
   void loadMeshVTS( const boost::filesystem::path& path, int scale = 1 ) 
   {
@@ -201,6 +217,69 @@ public:
     }
     computeO();
   }
+
+#pragma endregion LOADING
+
+#pragma region DISPLAY
+  void draw()
+  {
+    glEnableClientState( GL_VERTEX_ARRAY );
+    glEnableClientState( GL_COLOR_ARRAY );
+
+    glBindBuffer( GL_ARRAY_BUFFER, m_vertexVBO );
+    glVertexPointer(3, GL_FLOAT, 0, 0);
+
+    glBindBuffer( GL_ARRAY_BUFFER, m_colorVBO );
+    glColorPointer( 4, GL_UNSIGNED_BYTE, 0, 0);
+
+    glDrawArrays( GL_TRIANGLES, 0, 3 * m_nc );
+
+    glBindBuffer( GL_ARRAY_BUFFER, 0);
+    glDisableClientState( GL_VERTEX_ARRAY );
+    glDisableClientState( GL_COLOR_ARRAY );
+  }
+
+  void initVBO(int typeMesh) //0 static, 1 dynamic
+  {
+    /*FloatBuffer edgeGeometry = FloatBuffer.allocate( 2 * 3 * nc );
+    for (int i = 0; i < nc; i++)
+    {
+      edgeGeometry.put(G[V[i]].x);
+      edgeGeometry.put(G[V[i]].y);
+      edgeGeometry.put(G[V[i]].z);
+
+      int j = 1;
+      if ( (i+1) % 3 == 0 )
+      {
+        j = -2;
+      }
+      edgeGeometry.put(G[V[i+j]].x);
+      edgeGeometry.put(G[V[i+j]].y);
+      edgeGeometry.put(G[V[i+j]].z);
+    }
+    edgeGeometry.rewind();*/
+  
+    std::vector<int> col( m_nc );
+    for (int i = 0; i < nc; i++)
+    {
+      col[i] = 0xff0000ff;
+    }
+
+    glGenBuffers( 1, m_vertexVBO, 0 );
+    glBindBuffer( GL_ARRAY_BUFFER, m_vertexVBO );
+    glBufferData( GL_ARRAY_BUFFER, 3 * 4 * nc, m_GTable.data(), typeMesh == 0 ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
+
+    /*glGenBuffers( 1, m_edgeVBO, 0 );
+    glBindBuffer( GL_ARRAY_BUFFER, m_edgeVBO );
+    glBufferData( GL_ARRAY_BUFFER, 2 * 3 * 4 * nc, edgeGeometry, typeMesh == 0 ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );*/
+
+    glGenBuffers( 1, m_colorVBO, 0 );
+    glBindBuffer( GL_ARRAY_BUFFER, m_colorVBO );
+    glBufferData( GL_ARRAY_BUFFER, 4 * 4 * nc, col.data(), GL_DYNAMIC_DRAW );
+
+    glBindBuffer( GL_ARRAY_BUFFER, 0 );
+  }
+#pragma endregion DISPLAY
 };
 
 #endif//_MESH_H_

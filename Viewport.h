@@ -12,7 +12,13 @@ public:
 
   void draw( bool fDrawingFullScreen = false ) const throw() {}
 
-  bool containsPoint(int x, int y) const throw() {}
-}
+  void onMousePressed( int mouseX, int mouseY ) {}
+  void onMouseDragged( int deltaX, int deltaY ) {}
+  void onMouseMoved( int deltaX, int deltaY ) {}
+  void onKeyReleased( char ch ) {}
+  void onKeyPressed( char ch ) {}
+
+  bool containsPoint(int x, int y) const throw() { return false; }
+};
 
 #endif//_VIEWPORT_H_

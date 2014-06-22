@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <memory>
+#include <boost\function.hpp>
+#include <boost\bind.hpp>
 #include "debug.h"
 #include "helpers.h"
 
