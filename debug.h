@@ -4,8 +4,8 @@
 enum class DEBUG_LEVELS
 {
   VERBOSE,
-  LOW,
-  HIGH
+  HIGH,
+  LOW
 };
 
 const DEBUG_LEVELS DEBUG_LEVEL = DEBUG_LEVELS::VERBOSE;

@@ -5,12 +5,18 @@
 
 class Viewport
 {
+private:
+  std::vector< std::unique_ptr< IInteractableMesh > > m_meshes;
+
 public:
+  Viewport( Viewport&& other ) : m_meshes( std::move( other.m_meshes ) ) { }
+  Viewport( const Viewport&& other ) : m_meshes( std::move( other.m_meshes ) ) { }
+
   void onSelected() {}
   void onDeselected() {}
-  template < class T, class U > void registerMesh( Mesh<T,U> mesh ) {}
+  template < class T, class U > void registerMesh( std::unique_ptr< IInteractableMesh >& mesh );
 
-  void draw( bool fDrawingFullScreen = false ) const throw() {}
+  void draw( bool fDrawingFullScreen = false ) const throw();
 
   void onMousePressed( int mouseX, int mouseY ) {}
   void onMouseDragged( int deltaX, int deltaY ) {}

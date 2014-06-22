@@ -1,6 +1,7 @@
 #ifndef _WINDOW_H_
 #define _WINDOW_H_
 
+#include <GL/glew.h>
 #include <FL/Fl.h>
 #include <FL/Fl_Window.H>
 #include <FL/Fl_Gl_Window.H>

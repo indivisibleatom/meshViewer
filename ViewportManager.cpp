@@ -6,9 +6,9 @@ ViewportManager::ViewportManager( const Rect<int>& rect ) : m_selectedViewport( 
 {
 }
 
-void ViewportManager::addViewport( const Viewport& v )
+void ViewportManager::addViewport( const Viewport&& v )
 {
-  m_viewports.push_back( v );
+  m_viewports.push_back( std::move( v ) );
   if ( m_selectedViewport == -1 )
   {
     selectViewport( 0 );
@@ -68,7 +68,7 @@ void ViewportManager::draw() const throw()
   }
   else
   {
-    std::for_each( m_viewports.cbegin(), m_viewports.cend(), std::bind2nd( std::mem_fun_ref( &Viewport::draw ), m_fShowingFullScreen ) );
+    std::for_each( m_viewports.cbegin(), m_viewports.cend(), std::bind( &Viewport::draw, std::placeholders::_1, m_fShowingFullScreen ) );
   }
 }
 

@@ -6,12 +6,21 @@
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/serialization/strong_typedef.hpp>
+#include <GL/glew.h>
 #include <FL/gl.h>
 
 const int MAX_VALENCE = 100;
 
+class IInteractableMesh
+{
+private:
+public:
+  virtual void draw() const = 0;
+  virtual ~IInteractableMesh() = 0 {}
+};
+
 template <class T, class U>
-class Mesh
+class Mesh : public IInteractableMesh
 {
 private:
   BOOST_STRONG_TYPEDEF(T,TIndex);
@@ -26,11 +35,18 @@ private:
   std::vector<VIndex> m_OTable;
   std::vector<Point<U>> m_GTable;
 
-  GLint m_vertexVBO;
-  GLint m_colorVBO;
-  GLint m_edgeVBO;
+  GLuint m_vertexVBO;
+  GLuint m_colorVBO;
+  GLuint m_edgeVBO;
+
+  Mesh( const Mesh& ) {}
+  Mesh& operator=( const Mesh& ) { return *this; }
 
 public:
+  Mesh()
+  {
+  }
+
 #pragma region InitMesh
   void addVertex( const Point<U>& p );
   void addTriangle( VIndex v1, VIndex v2, VIndex v3 );
@@ -202,7 +218,7 @@ public:
     m_nt = numberTriangles;
     m_nc = 3 * numberTriangles;
     m_VTable.reserve( m_nc );
-    m_OTable.reserve( m_nc );
+    m_OTable.resize( m_nc, VIndex(0) );
     currentPtr = end + 1;
 
     currentLine = 0;
@@ -221,7 +237,7 @@ public:
 #pragma endregion LOADING
 
 #pragma region DISPLAY
-  void draw()
+  void draw() const override
   {
     glEnableClientState( GL_VERTEX_ARRAY );
     glEnableClientState( GL_COLOR_ARRAY );
@@ -260,22 +276,22 @@ public:
     edgeGeometry.rewind();*/
   
     std::vector<int> col( m_nc );
-    for (int i = 0; i < nc; i++)
+    for (CIndex i = CIndex(0); i < m_nc; i++)
     {
       col[i] = 0xff0000ff;
     }
 
-    glGenBuffers( 1, m_vertexVBO, 0 );
+    glGenBuffers( 1, &m_vertexVBO );
     glBindBuffer( GL_ARRAY_BUFFER, m_vertexVBO );
-    glBufferData( GL_ARRAY_BUFFER, 3 * 4 * nc, m_GTable.data(), typeMesh == 0 ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, 3 * 4 * m_nc, m_GTable.data(), typeMesh == 0 ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
 
     /*glGenBuffers( 1, m_edgeVBO, 0 );
     glBindBuffer( GL_ARRAY_BUFFER, m_edgeVBO );
     glBufferData( GL_ARRAY_BUFFER, 2 * 3 * 4 * nc, edgeGeometry, typeMesh == 0 ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );*/
 
-    glGenBuffers( 1, m_colorVBO, 0 );
+    glGenBuffers( 1, &m_colorVBO );
     glBindBuffer( GL_ARRAY_BUFFER, m_colorVBO );
-    glBufferData( GL_ARRAY_BUFFER, 4 * 4 * nc, col.data(), GL_DYNAMIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, 4 * 4 * m_nc, col.data(), GL_DYNAMIC_DRAW );
 
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
   }

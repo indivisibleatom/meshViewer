@@ -10,8 +10,14 @@ void Window::draw()
 {
   if ( !valid() )
   {
-    m_viewportManager.draw();
+    GLenum err = glewInit();
+    if (GLEW_OK != err)
+    {
+      LOG( glewGetErrorString( err ), DEBUG_LEVELS::LOW );
+      return ;
+    }
   }
+  m_viewportManager.draw();
 }
 
 int Window::handle( int evnt )
@@ -32,4 +38,5 @@ int Window::handle( int evnt )
   default:
     return Fl_Gl_Window::handle( evnt );
   }
+  return 1;
 }

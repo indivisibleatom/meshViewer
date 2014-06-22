@@ -15,7 +15,7 @@ private:
 
 public:
   ViewportManager( const Rect<int>& rect );
-  void addViewport( const Viewport& v );
+  void addViewport( std::auto_ptr< Viewport > v );
   int getSelectedViewport() const throw();
   void selectViewport( int index ) throw();
   template< class T, class U > void registerMeshToViewport( Mesh<T,U> mesh, int viewportIndex ) throw();
