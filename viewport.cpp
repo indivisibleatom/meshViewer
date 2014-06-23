@@ -2,7 +2,6 @@
 #include "Viewport.h"
 #include <boost/iterator/indirect_iterator.hpp>
 
-template <class T, class U>
 void Viewport::registerMesh( std::unique_ptr< IInteractableMesh >& mesh ) throw()
 {
   m_meshes.push_back( std::move( mesh ) );

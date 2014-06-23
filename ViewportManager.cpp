@@ -6,9 +6,9 @@ ViewportManager::ViewportManager( const Rect<int>& rect ) : m_selectedViewport( 
 {
 }
 
-void ViewportManager::addViewport( const Viewport&& v )
+void ViewportManager::addViewport( std::unique_ptr< Viewport >& viewport )
 {
-  m_viewports.push_back( std::move( v ) );
+  m_viewports.push_back( std::move( viewport ) );
   if ( m_selectedViewport == -1 )
   {
     selectViewport( 0 );
@@ -39,10 +39,10 @@ void ViewportManager::selectViewport( int index ) throw()
   //Track the selected viewport
   if ( m_selectedViewport != -1 )
   {
-    m_viewports[m_selectedViewport].onDeselected();
+    m_viewports[m_selectedViewport]->onDeselected();
   }
   m_selectedViewport = index;  
-  m_viewports[m_selectedViewport].onSelected();
+  m_viewports[m_selectedViewport]->onSelected();
 }
 
 template< class T, class U >
@@ -63,7 +63,7 @@ void ViewportManager::draw() const throw()
   {
     if ( m_selectedViewport != -1 )
     {
-      m_viewports[m_selectedViewport].draw( m_fShowingFullScreen );
+      m_viewports[m_selectedViewport]->draw( m_fShowingFullScreen );
     }
   }
   else
@@ -78,7 +78,7 @@ void ViewportManager::onMousePressed( int mouseX, int mouseY )
   selectViewport( viewport );
   if (m_selectedViewport != -1)
   {
-    m_viewports[m_selectedViewport].onMousePressed( mouseX, mouseY );
+    m_viewports[m_selectedViewport]->onMousePressed( mouseX, mouseY );
   }
   else
   {
@@ -90,7 +90,7 @@ void ViewportManager::onMouseDragged( int deltaX, int deltaY )
 {
   if (m_selectedViewport != -1)
   {
-    m_viewports[m_selectedViewport].onMouseDragged( deltaX, deltaY );
+    m_viewports[m_selectedViewport]->onMouseDragged( deltaX, deltaY );
   }
   else
   {
@@ -102,7 +102,7 @@ void ViewportManager::onMouseMoved( int deltaX, int deltaY )
 {
   if (m_selectedViewport != -1)
   {
-    m_viewports[m_selectedViewport].onMouseMoved( deltaX, deltaY );
+    m_viewports[m_selectedViewport]->onMouseMoved( deltaX, deltaY );
   }
   else
   {
@@ -114,7 +114,7 @@ void ViewportManager::onKeyReleased( char key )
 {
   if (m_selectedViewport != -1)
   {
-    m_viewports[m_selectedViewport].onKeyReleased( key );
+    m_viewports[m_selectedViewport]->onKeyReleased( key );
   }
   else
   {
@@ -140,7 +140,7 @@ void ViewportManager::onKeyPressed( char key )
 
   if (m_selectedViewport != -1)
   {
-    m_viewports[m_selectedViewport].onKeyPressed( key );
+    m_viewports[m_selectedViewport]->onKeyPressed( key );
   }
 }
 
@@ -153,7 +153,7 @@ int ViewportManager::getViewportForMouse( int mouseX, int mouseY ) const throw()
 
   for (int i = 0; i < m_viewports.size(); i++)
   {
-    if (m_viewports[i].containsPoint(mouseX, m_rect.y() - mouseY))
+    if (m_viewports[i]->containsPoint(mouseX, m_rect.y() - mouseY))
     {
       return i;
     }

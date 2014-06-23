@@ -16,6 +16,7 @@ void Window::draw()
       LOG( glewGetErrorString( err ), DEBUG_LEVELS::LOW );
       return ;
     }
+    gluPerspective( 60.0 , 1.0, 0.1 , 1000.0 );
   }
   m_viewportManager.draw();
 }
