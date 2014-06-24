@@ -18,4 +18,4 @@ const DEBUG_LEVELS DEBUG_LEVEL = DEBUG_LEVELS::VERBOSE;
   } \
 }
 
-#define LOGPERF boost::timer::auto_cpu_timer t
+#define LOGPERF boost::timer::auto_cpu_timer timer
