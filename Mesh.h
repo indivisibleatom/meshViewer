@@ -15,7 +15,10 @@ class IInteractableMesh
 {
 private:
 public:
+  virtual void init() = 0;
   virtual void draw() const = 0;
+  IInteractableMesh( IInteractableMesh&& other ) {}
+  IInteractableMesh() {}
   virtual ~IInteractableMesh() = 0 {}
 };
 
@@ -51,7 +54,7 @@ public:
   void addVertex( const Point<U>& p );
   void addTriangle( VIndex v1, VIndex v2, VIndex v3 );
 
-  void initMesh()
+  void init() override
   {
     initVBO( 0 );
   }
@@ -239,6 +242,13 @@ public:
 #pragma region DISPLAY
   void draw() const override
   {
+    /*glColor3f( 0.0, 1.0, 0.0 );
+    glBegin( GL_TRIANGLES );
+      glVertex3f( 0, 0, -10 );
+      glVertex3f( 100, 0, -10 );
+      glVertex3f( 50, 50, -10 );
+    glEnd();*/
+
     glEnableClientState( GL_VERTEX_ARRAY );
     glEnableClientState( GL_COLOR_ARRAY );
 
@@ -255,8 +265,15 @@ public:
     glDisableClientState( GL_COLOR_ARRAY );
   }
 
-  void initVBO(int typeMesh) //0 static, 1 dynamic
+  void initVBO(int typeMesh)//0 static, 1 dynamic
   {
+    std::vector< U > geometry;
+    for (int i = 0; i < m_nc; i++)
+    {
+      geometry.push_back( m_GTable[m_VTable[i]].x() );
+      geometry.push_back( m_GTable[m_VTable[i]].y() );
+      geometry.push_back( m_GTable[m_VTable[i]].z() );
+    }
     /*FloatBuffer edgeGeometry = FloatBuffer.allocate( 2 * 3 * nc );
     for (int i = 0; i < nc; i++)
     {
@@ -278,12 +295,12 @@ public:
     std::vector<int> col( m_nc );
     for (CIndex i = CIndex(0); i < m_nc; i++)
     {
-      col[i] = 0xff0000ff;
+      col[i] = 0x00ff00ff;
     }
 
     glGenBuffers( 1, &m_vertexVBO );
     glBindBuffer( GL_ARRAY_BUFFER, m_vertexVBO );
-    glBufferData( GL_ARRAY_BUFFER, 3 * 4 * m_nc, m_GTable.data(), typeMesh == 0 ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, 3 * sizeof( U ) * m_nc, geometry.data(), typeMesh == 0 ? GL_STATIC_DRAW : GL_DYNAMIC_DRAW );
 
     /*glGenBuffers( 1, m_edgeVBO, 0 );
     glBindBuffer( GL_ARRAY_BUFFER, m_edgeVBO );
@@ -291,7 +308,7 @@ public:
 
     glGenBuffers( 1, &m_colorVBO );
     glBindBuffer( GL_ARRAY_BUFFER, m_colorVBO );
-    glBufferData( GL_ARRAY_BUFFER, 4 * 4 * m_nc, col.data(), GL_DYNAMIC_DRAW );
+    glBufferData( GL_ARRAY_BUFFER, sizeof( int ) * m_nc, col.data(), GL_DYNAMIC_DRAW );
 
     glBindBuffer( GL_ARRAY_BUFFER, 0 );
   }

@@ -7,15 +7,18 @@
 #include <FL/Fl_Gl_Window.H>
 #include <FL/gl.h>
 #include "Rect.h"
-#include "ViewportManager.h"
+#include "ViewportHost.h"
 
-class Window : public Fl_Gl_Window
+class Window : public Fl_Gl_Window, public IViewportHost
 {
 private:
-  ViewportManager m_viewportManager;
+  IViewport* m_pViewport;
 
 public:
-  Window( const Rect<int>& rect, const std::string& name );
+  Window( IViewport* pViewport, const std::string& name );
+
+  bool isKeyPressed( int key ) const throw() override;
+
   void draw();
   int handle( int );
 };

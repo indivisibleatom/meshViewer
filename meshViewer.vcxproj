@@ -100,6 +100,7 @@
     <ClInclude Include="Rect.h" />
     <ClInclude Include="Vector.h" />
     <ClInclude Include="Viewport.h" />
+    <ClInclude Include="ViewportHost.h" />
     <ClInclude Include="ViewportManager.h" />
     <ClInclude Include="window.h" />
   </ItemGroup>

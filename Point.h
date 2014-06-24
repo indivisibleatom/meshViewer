@@ -2,6 +2,9 @@
 #define _POINT_H_
 
 template <class T>
+class Vector;
+
+template <class T>
 class Point
 {
 private:
@@ -13,6 +16,12 @@ public:
   Point() {}
 
   Point( T x, T y, T z ) throw() : m_x( x ), m_y( y ), m_z( z ) {}
+
+  Point( const Point& point, float s, const Vector<T>& vector ) throw() : m_x( point.x() + s * vector.x() ), m_y( point.y() + s * vector.y() ) , m_z( point.z() + s * vector.z() ) {}
+
+  T x() const throw() { return m_x; }
+  T y() const throw() { return m_y; }
+  T z() const throw() { return m_z; }
 
   Point& set( T x, T y, T z ) throw() 
   {

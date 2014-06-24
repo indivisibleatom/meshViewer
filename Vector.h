@@ -13,14 +13,40 @@ private:
 
 public:
   Vector() {}
+  Vector( const Vector& other ) : m_x ( other.m_x ), m_y( other.m_y ), m_z( other.m_z ) {}
   Vector( T x, T y, T z ) throw() : m_x( x ), m_y( y ), m_z( z ) {}
-  
+  Vector( float a, const Vector& vec ) throw() : m_x( a * vec.m_x ), m_y( a * vec.m_y ), m_z( a * vec.m_z ) {}
+  Vector( const Vector& vec, float a, const Vector& I, const Vector& J) // Rotated vec by a parallel to plane (I,J)
+  {
+    T x= vec.dot(I);
+    T y= vec.dot(J);
+    float c=cos(a);
+    float s=sin(a);
+    *this = vec.operator+( Vector( x*c-x-y*s, I ).operator+( Vector( x*s+y*c-y, J ) ) );
+  }
+
+  Vector operator+( const Vector& other ) const throw()
+  {
+    Vector retVal( *this );
+    retVal.add( other );
+    return retVal;
+  }
+
+  T x() const throw() { return m_x; }
+  T y() const throw() { return m_y; }
+  T z() const throw() { return m_z; }
+
   Vector& set( T x, T y, T z ) throw() 
   {
     m_x = x;
     m_y = y;
     m_z = z;
     return *this;
+  }
+
+  T dot( const Vector& other ) const throw()
+  {
+    return m_x * other.m_x + m_y * other.m_y + m_z * other.m_z;
   }
 
   Vector& set( const Vector& other ) throw() 
@@ -103,6 +129,6 @@ public:
     }
     return *this;
   }
-}
+};
 
 #endif//_VECTOR_H_
